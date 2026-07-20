@@ -1,0 +1,18 @@
+@using System
+
+<div class="event-card">
+    <h3>@Name</h3>
+    <p><strong>Date:</strong> @Date.ToLongDateString()</p>
+    <p><strong>Location:</strong> @Location</p>
+</div>
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = string.Empty;
+
+    [Parameter]
+    public DateTime Date { get; set; }
+
+    [Parameter]
+    public string Location { get; set; } = string.Empty;
+}
