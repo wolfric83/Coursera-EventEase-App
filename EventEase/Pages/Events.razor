@@ -1,0 +1,31 @@
+@page "/events"
+
+<PageTitle>Events</PageTitle>
+
+<h1>Event</h1>
+
+<div class="mb-3">
+    <label class="form-label">Event name</label>
+    <input class="form-control" @bind="Event.Name" />
+</div>
+<div class="mb-3">
+    <label class="form-label">Event date</label>
+    <input class="form-control" type="date" @bind="Event.Date" />
+</div>
+<div class="mb-3">
+    <label class="form-label">Event location</label>
+    <input class="form-control" @bind="Event.Location" />
+</div>
+
+<EventCard Name="@Event.Name"
+           Date="@Event.Date"
+           Location="@Event.Location" />
+
+@code {
+    private readonly EventModel Event = new EventModel
+    {
+        Name = "Community Meetup",
+        Date = new DateTime(2026, 8, 15),
+        Location = "City Conference Center"
+    };
+}
