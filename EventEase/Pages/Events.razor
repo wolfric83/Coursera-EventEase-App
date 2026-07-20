@@ -4,28 +4,104 @@
 
 <h1>Event</h1>
 
-<div class="mb-3">
-    <label class="form-label">Event name</label>
-    <input class="form-control" @bind="Event.Name" />
-</div>
-<div class="mb-3">
-    <label class="form-label">Event date</label>
-    <input class="form-control" type="date" @bind="Event.Date" />
-</div>
-<div class="mb-3">
-    <label class="form-label">Event location</label>
-    <input class="form-control" @bind="Event.Location" />
-</div>
+<EditForm Model="Event" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Event name</label>
+        <InputText class="form-control" @bind-Value="Event.Name" />
+        <ValidationMessage For="@(() => Event.Name)" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Event date</label>
+        <InputDate class="form-control" @bind-Value="Event.Date" />
+        <ValidationMessage For="@(() => Event.Date)" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Event location</label>
+        <InputText class="form-control" @bind-Value="Event.Location" />
+        <ValidationMessage For="@(() => Event.Location)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Event</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(statusMessage))
+{
+    <div class="mt-3 alert alert-info">@statusMessage</div>
+}
 
 <EventCard Name="@Event.Name"
            Date="@Event.Date"
            Location="@Event.Location" />
 
 @code {
-    private readonly EventModel Event = new EventModel
+    private EventModel Event = new EventModel
     {
         Name = "Community Meetup",
         Date = new DateTime(2026, 8, 15),
         Location = "City Conference Center"
     };
+
+    private string statusMessage = string.Empty;
+
+    private void HandleValidSubmit()
+    {
+        // Only called when the model is valid according to DataAnnotations
+        statusMessage = "Event is valid and processed.";
+    }
+
+    private void HandleInvalidSubmit(EditContext context)
+    {
+        // Called when validation fails
+        statusMessage = "Event has validation errors. Please fix them.";
+    }
+}
+
+<!-- Performance test section (temporary) -->
+<hr />
+<h2>Performance test (temporary)</h2>
+<p>Generate a large in-memory collection of mock events and render them using <em>EventCard</em>. This is for local performance testing only.</p>
+
+<div class="mb-3">
+    <label class="form-label">Number of mock events</label>
+    <input type="number" class="form-control" @bind="MockCount" min="1" />
+</div>
+
+<button class="btn btn-secondary mb-3" @onclick="GenerateMockEvents">Generate Mock Events</button>
+
+<p>Current mock events: @MockEvents.Count</p>
+
+@if (MockEvents?.Count > 0)
+{
+    <Virtualize Items="MockEvents" Context="e" ItemSize="120">
+        <div @key="e">
+            <EventCard Name="@e.Name" Date="@e.Date" Location="@e.Location" />
+        </div>
+    </Virtualize>
+}
+
+@code {
+    // Adjustable count for testing; change this value or the input above.
+    private int MockCount { get; set; } = 10;
+
+    // In-memory list of generated events for rendering tests.
+    private List<EventModel> MockEvents { get; set; } = new List<EventModel>();
+
+    private void GenerateMockEvents()
+    {
+        var list = new List<EventModel>(MockCount);
+        for (int i = 1; i <= MockCount; i++)
+        {
+            list.Add(new EventModel
+            {
+                Name = $"Mock Event {i}",
+                Date = DateTime.Today.AddDays(i % 365),
+                Location = $"Location {i % 100}"
+            });
+        }
+
+        MockEvents = list;
+    }
 }
