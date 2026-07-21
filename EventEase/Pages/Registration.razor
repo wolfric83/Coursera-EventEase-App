@@ -4,11 +4,81 @@
 
 <h1>Registration</h1>
 
-<p>Event registration will appear here. This is a placeholder page.</p>
+<EditForm Model="registrationModel" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 
-<div>
+    <div class="mb-3">
+        <label class="form-label">Attendee name</label>
+        <InputText class="form-control" @bind-Value="registrationModel.AttendeeName" />
+        <ValidationMessage For="@(() => registrationModel.AttendeeName)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email address</label>
+        <InputText class="form-control" @bind-Value="registrationModel.Email" />
+        <ValidationMessage For="@(() => registrationModel.Email)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Select event</label>
+        <InputSelect class="form-select" @bind-Value="SelectedEventIndex">
+            @for (int i = 0; i < availableEvents.Count; i++)
+            {
+                <option value="@i">@availableEvents[i].Name (@availableEvents[i].Date.ToShortDateString())</option>
+            }
+        </InputSelect>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(submissionMessage))
+{
+    <div class="mt-3 alert alert-success">@submissionMessage</div>
+}
+
+<h2 class="mt-4">Selected Event</h2>
+<EventCard Name="@registrationModel.SelectedEvent.Name"
+           Date="@registrationModel.SelectedEvent.Date"
+           Location="@registrationModel.SelectedEvent.Location" />
+
+<div class="mt-4">
     <NavLink class="nav-link" href="/event-details">Back to event details</NavLink>
 </div>
 <div>
     <NavLink class="nav-link" href="/events">Back to events</NavLink>
 </div>
+
+@code {
+    private RegistrationModel registrationModel = new RegistrationModel();
+    private string submissionMessage = string.Empty;
+    private List<EventModel> availableEvents = new List<EventModel>
+    {
+        new EventModel { Name = "Community Meetup", Date = DateTime.Today.AddDays(10), Location = "City Conference Center" },
+        new EventModel { Name = "Tech Talk", Date = DateTime.Today.AddDays(20), Location = "Library Auditorium" },
+        new EventModel { Name = "Networking Night", Date = DateTime.Today.AddDays(30), Location = "Downtown Hall" }
+    };
+
+    private int selectedEventIndex = 0;
+    private int SelectedEventIndex
+    {
+        get => selectedEventIndex;
+        set
+        {
+            selectedEventIndex = value;
+            registrationModel.SelectedEvent = availableEvents[value];
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        registrationModel.SelectedEvent = availableEvents[0];
+    }
+
+    private void HandleValidSubmit()
+    {
+        registrationModel.IsAttending = true;
+        submissionMessage = $"Registration complete for {registrationModel.AttendeeName} at {registrationModel.SelectedEvent.Name}.";
+    }
+}
