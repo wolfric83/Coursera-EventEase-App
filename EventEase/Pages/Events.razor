@@ -40,17 +40,29 @@
     <div class="mt-3 alert alert-info">@statusMessage</div>
 }
 
-@if (events.Any())
+@if (SessionState.Events.Any())
 {
     <h2 class="mt-4">Saved events</h2>
     <div class="row">
-        @foreach (var savedEvent in events)
+        @foreach (var savedEvent in SessionState.Events)
         {
             <div class="col-md-4 mb-3" @key="savedEvent">
                 <EventCard EventItem="savedEvent" OnViewDetails="SelectEvent" />
+                <div class="mt-2">
+                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => SelectEvent(savedEvent)">View</button>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="() => EditEvent(savedEvent)">Edit</button>
+                </div>
             </div>
         }
     </div>
+
+    @if (editableEvent is not null)
+    {
+        <hr />
+        <h3>Edit selected event</h3>
+        <p class="text-muted">Changes here update the saved event via two-way binding.</p>
+        <EventCard @bind-EventItem="editableEvent" />
+    }
 }
 
 @code {
@@ -62,30 +74,35 @@
         Description = "Join local attendees for a relaxed community meetup."
     };
 
-    private List<EventModel> events = new List<EventModel>();
+    // Use session-scoped events so edits persist across pages
+    // private List<EventModel> events = new List<EventModel>();
     private string statusMessage = string.Empty;
+    private EventModel? editableEvent;
 
     protected override void OnInitialized()
     {
-        events.Add(new EventModel
+        if (!SessionState.Events.Any())
+        {
+            SessionState.AddEvent(new EventModel
         {
             Name = Event.Name,
             Date = Event.Date,
             Location = Event.Location,
             Description = Event.Description
-        });
+            });
+        }
     }
 
     private void HandleValidSubmit()
     {
-        var existingEvent = events.Find(e =>
+        var existingEvent = SessionState.Events.Find(e =>
             e.Name == Event.Name &&
             e.Date == Event.Date &&
             e.Location == Event.Location);
 
         if (existingEvent is null)
         {
-            events.Add(new EventModel
+            SessionState.AddEvent(new EventModel
             {
                 Name = Event.Name,
                 Date = Event.Date,
@@ -117,6 +134,11 @@
         SessionState.SetSelectedEvent(selectedEvent);
         NavigationManager.NavigateTo("/event-details");
         return Task.CompletedTask;
+    }
+
+    private void EditEvent(EventModel selectedEvent)
+    {
+        editableEvent = selectedEvent;
     }
 }
 

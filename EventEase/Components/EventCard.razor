@@ -1,14 +1,31 @@
 @using EventEase.Models
 
 <div class="event-card">
-    <h3>@DisplayName</h3>
-    <p><strong>Date:</strong> @DisplayDate.ToLongDateString()</p>
-    <p><strong>Location:</strong> @DisplayLocation</p>
-    @if (OnViewDetails.HasDelegate && EventItem is not null)
+    @if (EventItem is not null)
     {
-        <p>
-            <button class="btn btn-link" type="button" @onclick="() => OnViewDetails.InvokeAsync(EventItem)">View details</button>
-        </p>
+        <h3>
+            <InputText class="form-control" value="@EventItem.Name" @oninput="UpdateName" />
+        </h3>
+        <p><strong>Date:</strong> <InputDate @bind-Value="EventItem.Date" class="form-control" @onchange="DateChanged" /></p>
+        <p><strong>Location:</strong> <InputText class="form-control" value="@EventItem.Location" @oninput="UpdateLocation" /></p>
+        @if (OnViewDetails.HasDelegate)
+        {
+            <p>
+                <button class="btn btn-link" type="button" @onclick="() => OnViewDetails.InvokeAsync(EventItem)">View details</button>
+            </p>
+        }
+    }
+    else
+    {
+        <h3>@DisplayName</h3>
+        <p><strong>Date:</strong> @DisplayDate.ToLongDateString()</p>
+        <p><strong>Location:</strong> @DisplayLocation</p>
+        @if (OnViewDetails.HasDelegate)
+        {
+            <p>
+                <NavLink class="btn btn-link" href="/event-details">View details</NavLink>
+            </p>
+        }
     }
 </div>
 
@@ -28,7 +45,31 @@
     [Parameter]
     public EventCallback<EventModel> OnViewDetails { get; set; }
 
+    // Bind support for parent: allow @bind-EventItem
+    [Parameter]
+    public EventCallback<EventModel?> EventItemChanged { get; set; }
+
     private string DisplayName => EventItem?.Name ?? Name;
     private DateTime DisplayDate => EventItem?.Date ?? Date;
     private string DisplayLocation => EventItem?.Location ?? Location;
+
+    private async Task UpdateName(ChangeEventArgs e)
+    {
+        if (EventItem is null) return;
+        EventItem.Name = e?.Value?.ToString() ?? string.Empty;
+        await EventItemChanged.InvokeAsync(EventItem);
+    }
+
+    private async Task UpdateLocation(ChangeEventArgs e)
+    {
+        if (EventItem is null) return;
+        EventItem.Location = e?.Value?.ToString() ?? string.Empty;
+        await EventItemChanged.InvokeAsync(EventItem);
+    }
+
+    private async Task DateChanged(ChangeEventArgs e)
+    {
+        if (EventItem is null) return;
+        await EventItemChanged.InvokeAsync(EventItem);
+    }
 }
