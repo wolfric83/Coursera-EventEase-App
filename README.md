@@ -30,16 +30,12 @@ Open the app in your browser (the run output will show the URL, or open `https:/
 
 ## Copilot assistance
 
-I used Copilot to help generate and refine component implementations and to explain Blazor concepts during development. Copilot-assisted work focused on component scaffolding (`EventCard`), form handling (`Registration`), session state patterns, and navigation fixes. See the conversation notes for a short summary you can copy into project documentation if needed.
+I used Copilot to help generate and refine component implementations and to explain Blazor concepts during development. Copilot-assisted work focused on component scaffolding (`EventCard`), form handling (`Registration`), session state patterns, and navigation fixes. 
 
 ## Testing notes
 
 - Run through `checklist.md` for manual registration tests.
 - Run through `testplan.md` to verify session-state behavior and navigation.
 
-## Next steps (optional)
-
-- Persist `SessionStateService.Events` and registration data to browser storage (`localStorage`) or a backend to survive refresh.
-- Add explicit Save/Undo controls around editable event fields if you want edits to require confirmation rather than applying immediately.
 
 *** End of README ***
