@@ -1,0 +1,61 @@
+@page "/attendance"
+@using EventEase.Components
+@using EventEase.Services
+@inject SessionStateService SessionState
+
+<PageTitle>Attendance</PageTitle>
+
+<h1>Attendance</h1>
+
+@if (!SessionState.IsRegistered)
+{
+    <p>No registration has been completed in this session yet.</p>
+    <p>
+        <NavLink class="nav-link" href="/registration">Go to registration</NavLink>
+    </p>
+}
+else
+{
+    <div class="mb-3">
+        <strong>Attendee name:</strong> @SessionState.AttendeeName
+    </div>
+    <div class="mb-3">
+        <strong>Email:</strong> @SessionState.Email
+    </div>
+    <div class="mb-3">
+        <strong>Selected event:</strong>
+        <EventCard Name="@SessionState.SelectedEvent.Name"
+                   Date="@SessionState.SelectedEvent.Date"
+                   Location="@SessionState.SelectedEvent.Location" />
+    </div>
+    <div class="mb-3">
+        <strong>Registration complete:</strong> @(SessionState.IsRegistered ? "Yes" : "No")
+    </div>
+    <div class="mb-3">
+        <label class="form-check-label">
+            <input type="checkbox" class="form-check-input me-2" checked="@SessionState.IsAttending" @onchange="ToggleAttendance" />
+            Mark as attending
+        </label>
+    </div>
+    <div class="mb-3">
+        <strong>Currently attending:</strong> @(SessionState.IsAttending ? "Yes" : "No")
+    </div>
+}
+
+<div class="mt-4">
+    <NavLink class="nav-link" href="/events">Back to events</NavLink>
+</div>
+
+@code {
+    private void ToggleAttendance(ChangeEventArgs args)
+    {
+        if (args.Value is bool isChecked)
+        {
+            SessionState.UpdateAttendance(isChecked);
+        }
+        else if (args.Value is string stringValue && bool.TryParse(stringValue, out var result))
+        {
+            SessionState.UpdateAttendance(result);
+        }
+    }
+}
