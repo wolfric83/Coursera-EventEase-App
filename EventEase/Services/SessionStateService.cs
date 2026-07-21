@@ -19,6 +19,11 @@ namespace EventEase.Services
             IsAttending = true;
         }
 
+        public void SetSelectedEvent(EventModel selectedEvent)
+        {
+            SelectedEvent = selectedEvent;
+        }
+
         public void UpdateAttendance(bool isAttending)
         {
             if (!IsRegistered)

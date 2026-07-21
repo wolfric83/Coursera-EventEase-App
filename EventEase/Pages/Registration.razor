@@ -56,9 +56,9 @@
     private string submissionMessage = string.Empty;
     private List<EventModel> availableEvents = new List<EventModel>
     {
-        new EventModel { Name = "Community Meetup", Date = DateTime.Today.AddDays(10), Location = "City Conference Center" },
-        new EventModel { Name = "Tech Talk", Date = DateTime.Today.AddDays(20), Location = "Library Auditorium" },
-        new EventModel { Name = "Networking Night", Date = DateTime.Today.AddDays(30), Location = "Downtown Hall" }
+        new EventModel { Name = "Community Meetup", Date = DateTime.Today.AddDays(10), Location = "City Conference Center", Description = "A relaxed gathering for local attendees to meet and share ideas." },
+        new EventModel { Name = "Tech Talk", Date = DateTime.Today.AddDays(20), Location = "Library Auditorium", Description = "A short presentation on a technology topic, followed by discussion." },
+        new EventModel { Name = "Networking Night", Date = DateTime.Today.AddDays(30), Location = "Downtown Hall", Description = "An evening event for professionals to network and connect." }
     };
 
     private int selectedEventIndex = 0;
@@ -74,7 +74,23 @@
 
     protected override void OnInitialized()
     {
-        registrationModel.SelectedEvent = availableEvents[0];
+        if (!string.IsNullOrWhiteSpace(SessionState.SelectedEvent.Name))
+        {
+            registrationModel.SelectedEvent = SessionState.SelectedEvent;
+            var matchIndex = availableEvents.FindIndex(e =>
+                e.Name == SessionState.SelectedEvent.Name &&
+                e.Date == SessionState.SelectedEvent.Date &&
+                e.Location == SessionState.SelectedEvent.Location);
+
+            if (matchIndex >= 0)
+            {
+                selectedEventIndex = matchIndex;
+            }
+        }
+        else
+        {
+            registrationModel.SelectedEvent = availableEvents[0];
+        }
     }
 
     private void HandleValidSubmit()

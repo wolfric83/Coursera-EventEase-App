@@ -1,8 +1,12 @@
 @page "/events"
+@inject EventEase.Services.SessionStateService SessionState
+@inject NavigationManager NavigationManager
 
 <PageTitle>Events</PageTitle>
 
-<h1>Event</h1>
+<h1>Edit event</h1>
+
+<p>Use this form to update the current event and then view it on the event details page.</p>
 
 <EditForm Model="Event" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
     <DataAnnotationsValidator />
@@ -23,6 +27,10 @@
         <InputText class="form-control" @bind-Value="Event.Location" />
         <ValidationMessage For="@(() => Event.Location)" />
     </div>
+    <div class="mb-3">
+        <label class="form-label">Event description</label>
+        <InputTextArea class="form-control" @bind-Value="Event.Description" />
+    </div>
 
     <button type="submit" class="btn btn-primary">Save Event</button>
 </EditForm>
@@ -32,30 +40,83 @@
     <div class="mt-3 alert alert-info">@statusMessage</div>
 }
 
-<EventCard Name="@Event.Name"
-           Date="@Event.Date"
-           Location="@Event.Location" />
+@if (events.Any())
+{
+    <h2 class="mt-4">Saved events</h2>
+    <div class="row">
+        @foreach (var savedEvent in events)
+        {
+            <div class="col-md-4 mb-3" @key="savedEvent">
+                <EventCard EventItem="savedEvent" OnViewDetails="SelectEvent" />
+            </div>
+        }
+    </div>
+}
 
 @code {
     private EventModel Event = new EventModel
     {
         Name = "Community Meetup",
         Date = new DateTime(2026, 8, 15),
-        Location = "City Conference Center"
+        Location = "City Conference Center",
+        Description = "Join local attendees for a relaxed community meetup."
     };
 
+    private List<EventModel> events = new List<EventModel>();
     private string statusMessage = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        events.Add(new EventModel
+        {
+            Name = Event.Name,
+            Date = Event.Date,
+            Location = Event.Location,
+            Description = Event.Description
+        });
+    }
 
     private void HandleValidSubmit()
     {
-        // Only called when the model is valid according to DataAnnotations
-        statusMessage = "Event is valid and processed.";
+        var existingEvent = events.Find(e =>
+            e.Name == Event.Name &&
+            e.Date == Event.Date &&
+            e.Location == Event.Location);
+
+        if (existingEvent is null)
+        {
+            events.Add(new EventModel
+            {
+                Name = Event.Name,
+                Date = Event.Date,
+                Location = Event.Location,
+                Description = Event.Description
+            });
+            statusMessage = $"New event '{Event.Name}' created.";
+            Event = new EventModel { Date = DateTime.Today };
+        }
+        else
+        {
+            statusMessage = $"An event with that name, date, and location already exists.";
+        }
     }
 
     private void HandleInvalidSubmit(EditContext context)
     {
-        // Called when validation fails
         statusMessage = "Event has validation errors. Please fix them.";
+    }
+
+    private void ViewDetails()
+    {
+        SessionState.SetSelectedEvent(Event);
+        NavigationManager.NavigateTo("/event-details");
+    }
+
+    private Task SelectEvent(EventModel selectedEvent)
+    {
+        SessionState.SetSelectedEvent(selectedEvent);
+        NavigationManager.NavigateTo("/event-details");
+        return Task.CompletedTask;
     }
 }
 

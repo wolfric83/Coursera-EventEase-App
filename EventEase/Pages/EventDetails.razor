@@ -1,14 +1,37 @@
 @page "/event-details"
+@using EventEase.Services
+@inject SessionStateService SessionState
 
 <PageTitle>Event Details</PageTitle>
 
 <h1>Event Details</h1>
 
-<p>This is the event details page. More information about the event will appear here.</p>
-
-<div>
-    <NavLink class="nav-link" href="/events">Back to events</NavLink>
-</div>
-<div>
-    <NavLink class="nav-link" href="/registration">Go to registration</NavLink>
-</div>
+@if (string.IsNullOrWhiteSpace(SessionState.SelectedEvent.Name))
+{
+    <p>No event has been selected yet. Please choose or edit an event on the event list page.</p>
+    <div>
+        <NavLink class="nav-link" href="/events">Back to events</NavLink>
+    </div>
+}
+else
+{
+    <div class="mb-3">
+        <strong>Event name:</strong> @SessionState.SelectedEvent.Name
+    </div>
+    <div class="mb-3">
+        <strong>Date:</strong> @SessionState.SelectedEvent.Date.ToLongDateString()
+    </div>
+    <div class="mb-3">
+        <strong>Location:</strong> @SessionState.SelectedEvent.Location
+    </div>
+    <div class="mb-3">
+        <strong>Description:</strong>
+        <p>@SessionState.SelectedEvent.Description</p>
+    </div>
+    <div class="mb-3">
+        <NavLink class="btn btn-primary" href="/registration">Register for this event</NavLink>
+    </div>
+    <div>
+        <NavLink class="nav-link" href="/events">Back to events</NavLink>
+    </div>
+}

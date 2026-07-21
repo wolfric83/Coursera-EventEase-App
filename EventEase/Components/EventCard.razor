@@ -1,15 +1,21 @@
-@using System
+@using EventEase.Models
 
 <div class="event-card">
-    <h3>@Name</h3>
-    <p><strong>Date:</strong> @Date.ToLongDateString()</p>
-    <p><strong>Location:</strong> @Location</p>
-    <p>
-        <NavLink class="btn btn-link" href="/event-details">View details</NavLink>
-    </p>
+    <h3>@DisplayName</h3>
+    <p><strong>Date:</strong> @DisplayDate.ToLongDateString()</p>
+    <p><strong>Location:</strong> @DisplayLocation</p>
+    @if (OnViewDetails.HasDelegate && EventItem is not null)
+    {
+        <p>
+            <button class="btn btn-link" type="button" @onclick="() => OnViewDetails.InvokeAsync(EventItem)">View details</button>
+        </p>
+    }
 </div>
 
 @code {
+    [Parameter]
+    public EventModel? EventItem { get; set; }
+
     [Parameter]
     public string Name { get; set; } = string.Empty;
 
@@ -18,4 +24,11 @@
 
     [Parameter]
     public string Location { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<EventModel> OnViewDetails { get; set; }
+
+    private string DisplayName => EventItem?.Name ?? Name;
+    private DateTime DisplayDate => EventItem?.Date ?? Date;
+    private string DisplayLocation => EventItem?.Location ?? Location;
 }
