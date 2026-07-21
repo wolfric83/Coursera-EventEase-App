@@ -1,4 +1,5 @@
 @page "/registration"
+@inject EventEase.Services.SessionStateService SessionState
 
 <PageTitle>Registration</PageTitle>
 
@@ -79,6 +80,7 @@
     private void HandleValidSubmit()
     {
         registrationModel.IsAttending = true;
-        submissionMessage = $"Registration complete for {registrationModel.AttendeeName} at {registrationModel.SelectedEvent.Name}.";
+        SessionState.SaveRegistration(registrationModel.AttendeeName, registrationModel.Email, registrationModel.SelectedEvent);
+        submissionMessage = $"Registration complete for {SessionState.AttendeeName} at {SessionState.SelectedEvent.Name}.";
     }
 }
